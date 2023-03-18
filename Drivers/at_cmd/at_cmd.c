@@ -5,6 +5,7 @@
 
 #include "main.h"
 
+#include "tests.h"
 
 AT_Request_pack_t AT_request_pack = {
 		.header = 0x4154, // "AT",
@@ -12,7 +13,14 @@ AT_Request_pack_t AT_request_pack = {
 		.mesh_str = 0x4853454D, //"MESH"
 		.delimiter = 0x00, // 00
 		.addr = 0x0001,
-		.data = 0x0000,
+		.data = 0x00000000,
+		.tail = 0x0d0a
+};
+
+AT_Receive_pack_t AT_receive_pack_template = {
+		.header = 0x00F1DD09,
+		.source_addr = 0x0000,
+		.target_addr = 0x0000,
 		.tail = 0x0d0a
 };
 
@@ -56,15 +64,14 @@ int start_receive(){
 }
 
 int decode_AT(){
-//	_uart1_write((uint8_t*)rxbuf, 20);
-	if(memcmp(rxbuf,"\xF1\xDD\x05",3) == 0){
+
+	if(memcmp(rxbuf,AT_receive_pack_template.header,3) == 0){
 		LOG("Received from edge\n");
 		uint16_t current_addr = (rxbuf[3] << 8) + rxbuf[4];
 		LOG(current_addr);
 		AT_Device_insert(current_addr);
-//		AT_device_table.Size
-	}
 
+	}
 	return AT_OK;
 }
 
@@ -139,13 +146,6 @@ int AT_check_addr(){
 		set_mode(EDGE_DEVICE);
 	}
 	return AT_OK;
-}
-
-void test(){
-	AT_Send(AT_request_pack.raw,14);
-	start_receive();
-	wait_receive();
-	decode_AT();
 }
 
 AT_Status_t AT_Init(){

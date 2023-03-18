@@ -34,11 +34,22 @@ typedef union {
 		uint32_t mesh_str;
 		uint8_t delimiter;
 		uint16_t addr;
-		uint16_t data;
+		uint32_t data;
 		uint16_t tail;
 	};
-	uint8_t raw[14];
+	uint8_t raw[16];
 } AT_Request_pack_t;
+
+typedef union {
+	struct __attribute__((packed)){
+		uint32_t header:24;
+		uint16_t source_addr;
+		uint16_t target_addr;
+		uint32_t data;
+		uint16_t tail;
+	};
+	uint8_t raw[13];
+} AT_Receive_pack_t;
 
 #define LOG uart1_write
 #define AT_Send( str , size ) _uart2_write( (uint8_t*)str , size )

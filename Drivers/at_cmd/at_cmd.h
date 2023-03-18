@@ -9,6 +9,14 @@
 #define AT_CMD_AT_CMD_H_
 
 #include "cmsis_os.h"
+#include "string.h"
+
+#include "drv_uart/drv_uart.h"
+
+
+#include "main.h"
+
+#include "tests.h"
 
 typedef enum
 {
@@ -41,15 +49,19 @@ typedef union {
 } AT_Request_pack_t;
 
 typedef union {
-	struct __attribute__((packed)){
-		uint32_t header:24;
+	struct {
+		uint16_t header_H;
+		uint8_t header_L;
 		uint16_t source_addr;
 		uint16_t target_addr;
 		uint32_t data;
 		uint16_t tail;
-	};
+	}__attribute__((packed));
 	uint8_t raw[13];
 } AT_Receive_pack_t;
+
+extern AT_Receive_pack_t AT_receive_pack_template;
+extern AT_Request_pack_t AT_request_pack;
 
 #define LOG uart1_write
 #define AT_Send( str , size ) _uart2_write( (uint8_t*)str , size )

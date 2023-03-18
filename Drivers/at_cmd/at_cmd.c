@@ -1,11 +1,5 @@
 #include "at_cmd.h"
-#include "drv_uart/drv_uart.h"
-#include "string.h"
-#include "cmsis_os.h"
 
-#include "main.h"
-
-#include "tests.h"
 
 AT_Request_pack_t AT_request_pack = {
 		.header = 0x4154, // "AT",
@@ -18,11 +12,14 @@ AT_Request_pack_t AT_request_pack = {
 };
 
 AT_Receive_pack_t AT_receive_pack_template = {
-		.header = 0x00F1DD09,
+		.header_H = 0xF1DD,
+		.header_L = 0x09,
 		.source_addr = 0x0000,
 		.target_addr = 0x0000,
 		.tail = 0x0d0a
 };
+
+//const header
 
 AT_Device_Mode_t AT_device_mode = UNKNOWN;
 
@@ -65,13 +62,13 @@ int start_receive(){
 
 int decode_AT(){
 
-	if(memcmp(rxbuf,AT_receive_pack_template.header,3) == 0){
-		LOG("Received from edge\n");
-		uint16_t current_addr = (rxbuf[3] << 8) + rxbuf[4];
-		LOG(current_addr);
-		AT_Device_insert(current_addr);
-
-	}
+//	uint32_t cur_header =
+//	if(memcmp(rxbuf,,3) == 0){
+//		LOG("Received from edge\n");
+//		uint16_t current_addr = (rxbuf[3] << 8) + rxbuf[4];
+//		LOG(current_addr);
+//		AT_Device_insert(current_addr);
+//	}
 	return AT_OK;
 }
 

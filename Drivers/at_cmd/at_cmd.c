@@ -29,9 +29,25 @@ AT_Status_t AT_request_send_pack (AT_Request_Set_t* pack){
 	return AT_OK;
 }
 
+enum AT_Request_Type{
+	REG_DEIVCE,
+	DOOR,
+	SMOKE,
+	RED,
+};
+
+
+
 AT_Status_t AT_receive_read_pack (AT_Receive_Read_t* pack){
 
-	AT_Receive_pack_t* raw_pack = (AT_Receive_pack_t*)&rxbuf;
+	AT_Receive_Pack_t* raw_pack = (union AT_Receive_pack_t *)&rxbuf;
+	pack->header = (raw_pack->header[0] << 8) + raw_pack->header[1];
+	pack->tail = (raw_pack->tail[0] << 8) + raw_pack->tail[1];
+
+	if(pack->header != 0xF1DD || pack->tail != 0x0A0D){
+		return AT_ERROR;
+	}
+
 	pack->data = (raw_pack->data[0] << 8) + raw_pack->data[1];
 	pack->source_addr = (raw_pack->source_addr[0] << 8) + raw_pack->source_addr[1];
 
@@ -93,10 +109,6 @@ AT_Device_Table_t AT_device_table = {
 	.Size = 0
 };
 
-enum{
-	ALREADY_EXIST,
-	ADD_SUCCESS
-};
 
 int AT_Device_insert(uint16_t addr){
 	int Size = AT_device_table.Size;

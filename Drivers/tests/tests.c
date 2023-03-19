@@ -26,20 +26,18 @@ void test_register(){
 
 	start_receive();
 	wait_receive();
-	AT_request_pack pack;
-	AT_receive_read_pack(pack);
-//	/*decoding*/
-//	AT_Receive_pack_t* cur_pack = (AT_Receive_pack_t*)rxbuf;
-//	if((cur_pack->header_H == AT_receive_pack_template.header_H
-//	&&	cur_pack->header_L == AT_receive_pack_template.header_L
-//	)){
-//		LOG("success");
-//	}
-	decode_AT();
+
+	AT_Receive_Read_t pack;
+	AT_receive_read_pack(&pack);
+
+	if(!(AT_Device_insert(pack.target_addr) == ADD_SUCCESS)){
+		LOG("ALREADY EXIST");
+	}
 }
 
 void test(){
-	test_setpack();
+//	test_setpack();
+	test_register();
 //	test_send();
 	while(1);
 }

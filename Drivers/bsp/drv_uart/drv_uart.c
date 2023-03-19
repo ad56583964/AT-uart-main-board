@@ -20,4 +20,3 @@ inline int _uart2_write(uint8_t *pData, uint16_t Size){
 	return HAL_UART_Transmit(&huart2, (uint8_t*)pData, Size, 1000);
 }
 
-

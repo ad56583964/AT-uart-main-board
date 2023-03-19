@@ -33,6 +33,11 @@ typedef enum
 	SHELL_ERROR
 } SHELL_StatusTypeDef;
 
+enum{
+	ALREADY_EXIST,
+	ADD_SUCCESS
+};
+
 enum {
 	AT_TEST = 0U,
 	AT_DEVICE = 1U
@@ -54,7 +59,8 @@ typedef union _AT_Request_Pack_t{
 
 typedef union AT_Receive_pack_t{
 	struct {
-		uint8_t header[3];
+		uint8_t header[2];
+		uint8_t connecter;
 		uint8_t source_addr[2];
 		uint8_t target_addr[2];
 		uint8_t type;
@@ -62,9 +68,11 @@ typedef union AT_Receive_pack_t{
 		uint8_t tail[2];
 	}__attribute__((packed));
 	uint8_t raw[12];
-} AT_Receive_pack_t;
+} AT_Receive_Pack_t;
 
 typedef struct _AT_Receive_Read_t{
+		uint16_t header;
+		uint16_t tail;
 		uint16_t source_addr;
 		uint16_t target_addr;
 		uint16_t data;
@@ -96,7 +104,7 @@ AT_Status_t AT_main_schedule();
 //extern AT_Receive_pack_t AT_receive_pack_template;
 extern AT_Request_Pack_t AT_request_pack;
 
-#define LOG uart1_write
+#define LOG uart2_write
 #define AT_Send( str , size ) _uart2_write( (uint8_t*)str , size )
 
 AT_Status_t AT_Init();

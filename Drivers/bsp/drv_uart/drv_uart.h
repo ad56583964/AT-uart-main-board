@@ -26,6 +26,4 @@ int _uart2_write(uint8_t *pData, uint16_t Size);
 
 int EVENT_Test();
 
-
-
 #endif /* BSP_DRV_UART_H_ */

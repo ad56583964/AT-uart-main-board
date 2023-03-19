@@ -18,7 +18,10 @@
 
 #include "tests.h"
 
-typedef enum
+
+
+
+typedef enum _AT_Status_t
 {
 	AT_OK,
 	AT_ERROR
@@ -35,39 +38,40 @@ enum {
 	AT_DEVICE = 1U
 };
 
-typedef union {
+typedef union _AT_Request_Pack_t{
 	struct __attribute__((packed)){
-		uint16_t header;
+		uint8_t header[2];
 		uint8_t connector;
-		uint32_t mesh_str;
+		uint8_t mesh_str[4];
 		uint8_t delimiter;
-		uint16_t addr;
-		uint32_t data;
-		uint16_t tail;
+		uint8_t addr[2];
+		uint8_t type[2];
+		uint8_t	data[2];
+		uint8_t tail[2];
 	};
 	uint8_t raw[16];
-} AT_Request_pack_t;
+} AT_Request_Pack_t;
 
-typedef union {
+typedef union AT_Receive_pack_t{
 	struct {
-		uint16_t header_H;
-		uint8_t header_L;
-		uint16_t source_addr;
-		uint16_t target_addr;
-		uint32_t data;
-		uint16_t tail;
+		uint8_t header[3];
+		uint8_t source_addr[2];
+		uint8_t target_addr[2];
+		uint8_t type;
+		uint8_t data[2];
+		uint8_t tail[2];
 	}__attribute__((packed));
-	uint8_t raw[13];
+	uint8_t raw[12];
 } AT_Receive_pack_t;
 
-extern AT_Receive_pack_t AT_receive_pack_template;
-extern AT_Request_pack_t AT_request_pack;
+typedef struct _AT_Receive_Read_t{
+		uint16_t source_addr;
+		uint16_t target_addr;
+		uint16_t data;
+		uint8_t type;
+} AT_Receive_Read_t;
 
-#define LOG uart1_write
-#define AT_Send( str , size ) _uart2_write( (uint8_t*)str , size )
 
-AT_Status_t AT_Init();
-AT_Status_t AT_check_reply();
 
 typedef uint16_t addr_t;
 
@@ -81,8 +85,22 @@ typedef struct {
 	uint8_t Size;
 } AT_Device_Table_t;
 
+typedef struct _AT_Request_Set_t {
+	uint16_t addr;
+	uint8_t type;
+	uint16_t data;
+} AT_Request_Set_t;
 
 AT_Status_t AT_main_schedule();
+
+//extern AT_Receive_pack_t AT_receive_pack_template;
+extern AT_Request_Pack_t AT_request_pack;
+
+#define LOG uart1_write
+#define AT_Send( str , size ) _uart2_write( (uint8_t*)str , size )
+
+AT_Status_t AT_Init();
+AT_Status_t AT_check_reply();
 
 int AT_Device_insert(uint16_t addr);
 
@@ -94,6 +112,9 @@ int wait_receive();
 int start_receive();
 
 int decode_AT();
+
+AT_Status_t AT_request_send_pack (AT_Request_Set_t* pack);
+AT_Status_t AT_receive_read_pack (AT_Receive_Read_t* pack);
 
 typedef enum{
 	UNKNOWN,

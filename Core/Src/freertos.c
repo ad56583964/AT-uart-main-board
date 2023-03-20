@@ -168,17 +168,8 @@ void ATProcessTask(void *argument)
   /* USER CODE BEGIN ATProcessTask */
 
 	//test
+	test();
 
-	int result = 0;
-	result = AT_Init();
-	configASSERT(result == AT_OK);
-
-	result = AT_check_addr();
-	configASSERT(result == AT_OK);
-
-	if(AT_device_mode == MAIN_DEVICE){
-		AT_main_schedule();
-	}
   /* Infinite loop */
   for(;;)
   {

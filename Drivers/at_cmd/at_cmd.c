@@ -25,17 +25,16 @@ AT_Status_t AT_request_send_pack (AT_Request_Set_t* pack){
 	AT_request_pack.data[0] = pack->data >> 8;
 	AT_request_pack.data[1] = pack->data&0xff;
 
-	_uart2_write((uint8_t*)&AT_request_pack, 16);
+	AT_Send((uint8_t*)&AT_request_pack, 16);
 	return AT_OK;
 }
 
-enum AT_Request_Type{
-	REG_DEIVCE,
-	DOOR,
-	SMOKE,
-	RED,
-};
-
+AT_Status_t _check_header_tail(AT_Receive_Read_t* pack){
+	if(pack->header != 0xF1DD || pack->tail != 0x0A0D){
+		return AT_ERROR;
+	}
+	return AT_OK;
+}
 
 
 AT_Status_t AT_receive_read_pack (AT_Receive_Read_t* pack){
@@ -44,15 +43,25 @@ AT_Status_t AT_receive_read_pack (AT_Receive_Read_t* pack){
 	pack->header = (raw_pack->header[0] << 8) + raw_pack->header[1];
 	pack->tail = (raw_pack->tail[0] << 8) + raw_pack->tail[1];
 
-	if(pack->header != 0xF1DD || pack->tail != 0x0A0D){
-		return AT_ERROR;
-	}
+	_check_header_tail(pack);
 
 	pack->data = (raw_pack->data[0] << 8) + raw_pack->data[1];
 	pack->source_addr = (raw_pack->source_addr[0] << 8) + raw_pack->source_addr[1];
 
 	return AT_OK;
 }
+
+AT_Status_t AT_confirm_return(uint16_t addr){
+
+	AT_Request_Set_t pack;
+	pack.addr = addr;
+	pack.type = MAIN_ACK;
+
+	AT_request_send_pack(&pack);
+	return AT_OK;
+}
+
+
 
 AT_Device_Mode_t AT_device_mode = UNKNOWN;
 
@@ -95,13 +104,7 @@ int start_receive(){
 
 int decode_AT(){
 
-//	uint32_t cur_header =
-//	if(memcmp(rxbuf,,3) == 0){
-//		LOG("Received from edge\n");
-//		uint16_t current_addr = (rxbuf[3] << 8) + rxbuf[4];
-//		LOG(current_addr);
-//		AT_Device_insert(current_addr);
-//	}
+
 	return AT_OK;
 }
 
@@ -109,8 +112,7 @@ AT_Device_Table_t AT_device_table = {
 	.Size = 0
 };
 
-
-int AT_Device_insert(uint16_t addr){
+int AT_Device_insert(uint16_t addr,uint8_t type){
 	int Size = AT_device_table.Size;
 	for(int i = Size; i > 0;i --){
 		if(AT_device_table.Device[i-1].address == addr){
@@ -120,6 +122,7 @@ int AT_Device_insert(uint16_t addr){
 	}
 	Size++;
 	AT_device_table.Device[Size - 1].address = addr;
+	AT_device_table.Device[Size - 1].type = type;
 	AT_device_table.Size = Size;
 	return ADD_SUCCESS;
 }
@@ -131,12 +134,14 @@ int init_device_table(){
 }
 
 AT_Status_t AT_main_schedule(){
-	init_device_table();
 
+	init_device_table();
 	while(1){
 		start_receive();
 		wait_receive();
-		decode_AT();
+//		AT_receive_read_pack(pack)
+		LOG(rxbuf);
+		osDelay(1);
 	}
 	return AT_OK;
 }
@@ -177,10 +182,6 @@ int AT_check_addr(){
 AT_Status_t AT_Init(){
 	init_receive();
 
-	//test
-	test();
-	//test_end
-
 	for(int i = 5; i > 0; i--){
 		if(AT_first_request() == AT_OK){
 			LOG("init_sucess\n");
@@ -189,7 +190,7 @@ AT_Status_t AT_Init(){
 		osDelay(200);
 	}
 
-	LOG("Please Reset");
+	LOG("Please Reset\n");
 	osDelay(500);
 
 	return AT_ERROR;

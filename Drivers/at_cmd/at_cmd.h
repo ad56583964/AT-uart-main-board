@@ -27,11 +27,26 @@ typedef enum _AT_Status_t
 	AT_ERROR
 } AT_Status_t;
 
-typedef enum
-{
-	SHELL_OK,
-	SHELL_ERROR
-} SHELL_StatusTypeDef;
+//typedef enum
+//{
+//	SHELL_OK,
+//	SHELL_ERROR
+//} SHELL_StatusTypeDef;
+
+typedef enum _AT_Request_Type_t{
+	REG_DEVICE,
+	DOOR_DEVICE,
+	SMOKE_DEVICE,
+	IR_DEVICE,
+	MAIN_ACK,
+	EDGE_ACK
+}AT_Request_Type_t;
+
+typedef enum _EDGE_Type_t{
+	EDGE_DOOR,
+	EDGE_SMOKE,
+	EDGE_IR,
+}EDGE_Type_t;
 
 enum{
 	ALREADY_EXIST,
@@ -79,8 +94,6 @@ typedef struct _AT_Receive_Read_t{
 		uint8_t type;
 } AT_Receive_Read_t;
 
-
-
 typedef uint16_t addr_t;
 
 typedef struct {
@@ -104,13 +117,14 @@ AT_Status_t AT_main_schedule();
 //extern AT_Receive_pack_t AT_receive_pack_template;
 extern AT_Request_Pack_t AT_request_pack;
 
-#define LOG uart2_write
+#define LOG uart1_write
 #define AT_Send( str , size ) _uart2_write( (uint8_t*)str , size )
 
 AT_Status_t AT_Init();
 AT_Status_t AT_check_reply();
+AT_Status_t AT_confirm_return(uint16_t addr);
 
-int AT_Device_insert(uint16_t addr);
+int AT_Device_insert(uint16_t addr,uint8_t type);
 
 int AT_check_addr();
 int init_receive();

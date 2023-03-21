@@ -129,7 +129,7 @@ int AT_check_addr();
 int init_receive();
 
 int wait_receive();
-
+int open_receive();
 int start_receive();
 AT_Status_t clear_semaphore();
 int decode_AT();

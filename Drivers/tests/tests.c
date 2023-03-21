@@ -72,25 +72,55 @@ void test_receive_pack_REG_DEVICE_once(){
 	LOG("WAIT MESSAGE");
 	wait_receive();
 
-	AT_Receive_Read_t pack;
-	AT_receive_read_pack(&pack);
+	AT_Receive_Read_t received_pack;
+	AT_receive_read_pack(&received_pack);
 	/*process_pack*/
+	AT_Request_Type_t type = received_pack.type;
+//	uint16_t data = received_pack.data;
+	AT_Request_Set_t request_pack;
+	// is REG_DEVICE request
+	/*REG_DEVICE*/
+	if(type == REG_DEVICE){
+		request_pack.addr = received_pack.source_addr;
+		request_pack.type = MAIN_ACK;
+		AT_request(&request_pack,&received_pack);
+		if(received_pack.type == EDGE_ACK){
+			LOG("REG_SUCCESS");
+		}
+	}
+
+}
+
+//void test_receive_pack_REG_DEVICE_once_old(){
+//	AT_Init();
+//	AT_check_addr();
+//
+//	/*AT_main_schedule()*/
+//	/*loop_once*/
+//	start_receive();
+//	LOG("WAIT MESSAGE");
+//	wait_receive();
+//
+//	AT_Receive_Read_t pack;
+//	AT_receive_read_pack(&pack);
+//	/*process_pack*/
 //	AT_Request_Type_t type = pack.type;
 //	uint16_t data = pack.data;
-
-	/*REG_DEVICE*/
-	start_receive();
-	AT_confirm_return(pack.source_addr);
-	clear_semaphore();
-	LOG("MAIN WAIT ACK");
-	wait_receive();
-	AT_receive_read_pack(&pack);
-	if(pack.type == EDGE_ACK){
-		AT_Device_insert(pack.source_addr,pack.data&0xff);
-		LOG("SUCCESS REG DEVICE");
-	}
-	osDelay(1);
-}
+//
+//	// is REG_DEVICE request
+//	/*REG_DEVICE*/
+//	open_receive();
+//	AT_confirm_return(pack.source_addr);
+//	clear_semaphore();
+//	LOG("MAIN WAIT ACK");
+//	wait_receive();
+//	AT_receive_read_pack(&pack);
+//	if(pack.type == EDGE_ACK){
+//		AT_Device_insert(pack.source_addr,pack.data&0xff);
+//		LOG("SUCCESS REG DEVICE");
+//	}
+//	osDelay(1);
+//}
 
 void test_AT_confirm_return()
 {
@@ -145,9 +175,9 @@ void test_AT_request(){
 }
 
 void test(){
-	test_AT_request(); //SUCCESS
+//	test_AT_request(); //SUCCESS
 //	test_AT_confirm_return(); //SUCCESS
-//	test_receive_pack_REG_DEVICE_once();
+	test_receive_pack_REG_DEVICE_once();
 //	test_connect_24m();
 //	test_init();
 //	test_setpack();

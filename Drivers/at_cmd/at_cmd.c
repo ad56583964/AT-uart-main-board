@@ -85,11 +85,9 @@ AT_Status_t AT_receive_read_pack (AT_Receive_Read_t* pack){
 
 AT_Status_t AT_confirm_return(uint16_t addr){
 
-//	AT_request(pack, get_pack)
+//	AT_request(pack, get_pack);
 	return AT_OK;
 }
-
-
 
 AT_Device_Mode_t AT_device_mode = UNKNOWN;
 
@@ -133,6 +131,11 @@ int wait_receive(){
 }
 
 int start_receive(){
+	HAL_UARTEx_ReceiveToIdle_DMA(&huart2,(uint8_t*)&rxbuf,RX_BUF_SIZE);
+	return AT_OK;
+}
+
+int open_receive(){
 	HAL_UARTEx_ReceiveToIdle_DMA(&huart2,(uint8_t*)&rxbuf,RX_BUF_SIZE);
 	return AT_OK;
 }

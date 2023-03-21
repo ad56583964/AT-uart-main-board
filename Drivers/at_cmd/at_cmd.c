@@ -139,7 +139,6 @@ AT_Status_t AT_main_schedule(){
 	while(1){
 		start_receive();
 		wait_receive();
-//		AT_receive_read_pack(pack)
 		LOG(rxbuf);
 		osDelay(1);
 	}

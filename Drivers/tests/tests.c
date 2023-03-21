@@ -70,17 +70,18 @@ void test_receive_pack_REG_DEVICE_once(){
 	AT_Receive_Read_t pack;
 	AT_receive_read_pack(&pack);
 	/*process_pack*/
-	AT_Request_Type_t type = pack.type;
-	uint16_t data = pack.data;
+//	AT_Request_Type_t type = pack.type;
+//	uint16_t data = pack.data;
 
 	/*REG_DEVICE*/
-	AT_Device_insert(pack.source_addr,pack.data&0xff);
-
 	start_receive();
 	AT_confirm_return(pack.source_addr);
 	wait_receive();
 	AT_receive_read_pack(&pack);
-
+	if(pack.type == EDGE_ACK){
+		AT_Device_insert(pack.source_addr,pack.data&0xff);
+		LOG("SUCCESS REG DEVICE");
+	}
 	osDelay(1);
 
 }
@@ -98,7 +99,7 @@ void test_receive_pack_once(){
 	AT_receive_read_pack(&pack);
 	/*process_pack*/
 	uint8_t type = pack.type;
-	uint16_t data = pack.data;
+//	uint16_t data = pack.data;
 
 	switch(type){
 		case REG_DEVICE:{

@@ -13,7 +13,6 @@
 
 #include "drv_uart/drv_uart.h"
 
-
 #include "main.h"
 
 #include "tests.h"

@@ -58,6 +58,10 @@ void test_connect_receive(){
 	}
 }
 
+void test_preload(){
+
+}
+
 void test_receive_pack_REG_DEVICE_once(){
 	AT_Init();
 	AT_check_addr();
@@ -84,6 +88,12 @@ void test_receive_pack_REG_DEVICE_once(){
 	}
 	osDelay(1);
 
+}
+
+void test_AT_confirm_return()
+{
+	//addr 0x0005
+	AT_confirm_return(0x0005);
 }
 
 void test_receive_pack_once(){
@@ -123,7 +133,8 @@ void test_receive_pack_once(){
 }
 
 void test(){
-	test_receive_pack_REG_DEVICE_once();
+	test_AT_confirm_return();
+//	test_receive_pack_REG_DEVICE_once();
 //	test_connect_24m();
 //	test_init();
 //	test_setpack();

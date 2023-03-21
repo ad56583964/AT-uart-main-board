@@ -64,11 +64,11 @@ typedef union _AT_Request_Pack_t{
 		uint8_t mesh_str[4];
 		uint8_t delimiter;
 		uint8_t addr[2];
-		uint8_t type[2];
+		uint8_t type[1];
 		uint8_t	data[2];
 		uint8_t tail[2];
 	};
-	uint8_t raw[16];
+	uint8_t raw[15];
 } AT_Request_Pack_t;
 
 typedef union AT_Receive_pack_t{

@@ -10,7 +10,7 @@ typedef enum _AT_Request_Set_Eunm_t{
 AT_Request_Pack_t AT_request_pack = {
 		.header = {0x41,0x54},//0x4154, // "AT",
 		.connector = '+',
-		.mesh_str = {0x48,0x53,0x45,0x4D},//0x4853454D, //"MESH"
+		.mesh_str = {0x4D,0x45,0x53,0x48},//0x4853454D, //"HSEM" <- "MESH"
 		.delimiter = 0x00, // 00
 		.addr = {0x00,0x01},
 		.type = {0},
@@ -25,7 +25,7 @@ AT_Status_t AT_request_send_pack (AT_Request_Set_t* pack){
 	AT_request_pack.data[0] = pack->data >> 8;
 	AT_request_pack.data[1] = pack->data&0xff;
 
-	AT_Send((uint8_t*)&AT_request_pack, 16);
+	AT_Send((uint8_t*)&AT_request_pack, 15);
 	return AT_OK;
 }
 
@@ -56,6 +56,7 @@ AT_Status_t AT_confirm_return(uint16_t addr){
 	AT_Request_Set_t pack;
 	pack.addr = addr;
 	pack.type = MAIN_ACK;
+	pack.data = 0x00;
 
 	AT_request_send_pack(&pack);
 	return AT_OK;

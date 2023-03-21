@@ -170,14 +170,11 @@ void ATProcessTask(void *argument)
   /* USER CODE BEGIN ATProcessTask */
 
 	//test
-	test();
+//	test();
 
   /* Infinite loop */
   for(;;)
   {
-//	start_receive();
-//	wait_receive();
-//	decode_AT();
     osDelay(1);
   }
   /* USER CODE END ATProcessTask */
@@ -193,10 +190,12 @@ void ATProcessTask(void *argument)
 void shellTask(void *argument)
 {
   /* USER CODE BEGIN shellTask */
+
+  sensor_test();
+
   /* Infinite loop */
   for(;;)
   {
-	sensor_test();
     osDelay(1);
   }
   /* USER CODE END shellTask */

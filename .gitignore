@@ -10,3 +10,5 @@ Debug/
 
 # STM32 git ignore
 *.mxproject
+
+/Middlewares

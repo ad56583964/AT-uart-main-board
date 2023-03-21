@@ -15,7 +15,8 @@
 
 #include "main.h"
 
-
+#define LOG UART1_printf
+#define AT_Send( str , size ) _uart2_write( (uint8_t*)str , size )
 
 
 
@@ -115,8 +116,6 @@ AT_Status_t AT_main_schedule();
 //extern AT_Receive_pack_t AT_receive_pack_template;
 extern AT_Request_Pack_t AT_request_pack;
 
-#define LOG uart1_write
-#define AT_Send( str , size ) _uart2_write( (uint8_t*)str , size )
 
 AT_Status_t AT_Init();
 AT_Status_t AT_check_reply();

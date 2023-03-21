@@ -138,6 +138,9 @@ AT_Status_t AT_request (AT_Request_Set_t* pack,AT_Receive_Read_t* get_pack);
 AT_Status_t AT_request_send_pack (AT_Request_Set_t* pack);
 AT_Status_t AT_receive_read_pack (AT_Receive_Read_t* pack);
 
+AT_Status_t AT_process_reg_device(AT_Request_Set_t* request_pack,
+									AT_Receive_Read_t* received_pack);
+
 typedef enum{
 	UNKNOWN,
 	MAIN_DEVICE,

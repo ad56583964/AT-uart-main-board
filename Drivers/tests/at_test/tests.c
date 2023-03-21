@@ -76,19 +76,13 @@ void test_receive_pack_REG_DEVICE_once(){
 	AT_receive_read_pack(&received_pack);
 	/*process_pack*/
 	AT_Request_Type_t type = received_pack.type;
-//	uint16_t data = received_pack.data;
+
 	AT_Request_Set_t request_pack;
 	// is REG_DEVICE request
 	/*REG_DEVICE*/
 	if(type == REG_DEVICE){
-		request_pack.addr = received_pack.source_addr;
-		request_pack.type = MAIN_ACK;
-		AT_request(&request_pack,&received_pack);
-		if(received_pack.type == EDGE_ACK){
-			LOG("REG_SUCCESS");
-		}
+		AT_process_reg_device(&request_pack,&received_pack);
 	}
-
 }
 
 //void test_receive_pack_REG_DEVICE_once_old(){
@@ -149,6 +143,7 @@ void test_receive_pack_once(){
 			break;
 		}
 		case IR_DEVICE:{
+
 			break;
 		}
 		case SMOKE_DEVICE:{

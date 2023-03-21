@@ -27,6 +27,8 @@
 /* USER CODE BEGIN Includes */
 #include "at_cmd.h"
 #include "drv_uart/drv_uart.h"
+#include "at_test/tests.h"
+#include "sensor_test/sensor_test.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -194,6 +196,7 @@ void shellTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
+	sensor_test();
     osDelay(1);
   }
   /* USER CODE END shellTask */

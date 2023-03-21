@@ -150,6 +150,7 @@ AT_Device_Table_t AT_device_table = {
 	.Size = 0
 };
 
+
 int AT_Device_insert(uint16_t addr,uint8_t type){
 	int Size = AT_device_table.Size;
 	for(int i = Size; i > 0;i --){
@@ -168,6 +169,23 @@ int AT_Device_insert(uint16_t addr,uint8_t type){
 int init_device_table(){
 
 
+	return AT_OK;
+}
+
+AT_Status_t AT_process_reg_device(AT_Request_Set_t* request_pack,AT_Receive_Read_t* received_pack){
+	uint16_t REG_addr = received_pack->source_addr;
+	uint16_t REG_type = received_pack->data&0xFF;
+
+	//MAIN IS ACK
+	request_pack->addr = REG_addr;
+	request_pack->type = MAIN_ACK;
+
+	AT_request(request_pack,received_pack);
+	if(received_pack->type == EDGE_ACK){
+		//EDGE IS ACK
+		AT_Device_insert(REG_addr, REG_type);
+		LOG("REG_SUCCESS");
+	}
 	return AT_OK;
 }
 

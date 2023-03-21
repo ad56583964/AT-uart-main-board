@@ -69,6 +69,7 @@ void test_receive_pack_REG_DEVICE_once(){
 	/*AT_main_schedule()*/
 	/*loop_once*/
 	start_receive();
+	LOG("WAIT MESSAGE");
 	wait_receive();
 
 	AT_Receive_Read_t pack;
@@ -80,6 +81,8 @@ void test_receive_pack_REG_DEVICE_once(){
 	/*REG_DEVICE*/
 	start_receive();
 	AT_confirm_return(pack.source_addr);
+	clear_semaphore();
+	LOG("MAIN WAIT ACK");
 	wait_receive();
 	AT_receive_read_pack(&pack);
 	if(pack.type == EDGE_ACK){
@@ -87,7 +90,6 @@ void test_receive_pack_REG_DEVICE_once(){
 		LOG("SUCCESS REG DEVICE");
 	}
 	osDelay(1);
-
 }
 
 void test_AT_confirm_return()
@@ -132,8 +134,19 @@ void test_receive_pack_once(){
 
 }
 
+void test_AT_request(){
+	AT_Request_Set_t pack;
+	AT_Receive_Read_t get_pack;
+	pack.addr = 0x0005;
+	pack.type = MAIN_ACK;
+	AT_request(&pack,&get_pack);
+	LOG("request success");
+
+}
+
 void test(){
-	test_AT_confirm_return();
+	test_AT_request(); //SUCCESS
+//	test_AT_confirm_return(); //SUCCESS
 //	test_receive_pack_REG_DEVICE_once();
 //	test_connect_24m();
 //	test_init();

@@ -18,6 +18,18 @@ AT_Request_Pack_t AT_request_pack = {
 		.tail = {0x0d,0x0a},//0x0d0a
 };
 
+AT_Status_t _is_send_ok(){
+	int result = 0;
+	result = strncmp(rxbuf,"OK\r\n",4);
+	if(result == 0){
+		LOG("send_sucess\n");
+	}
+	else{
+		LOG("send_failed\n");
+	}
+	return AT_OK;
+}
+
 AT_Status_t AT_request_send_pack (AT_Request_Set_t* pack){
 	AT_request_pack.addr[0] = pack->addr >> 8;
 	AT_request_pack.addr[1] = pack->addr&0xff;
@@ -26,6 +38,25 @@ AT_Status_t AT_request_send_pack (AT_Request_Set_t* pack){
 	AT_request_pack.data[1] = pack->data&0xff;
 
 	AT_Send((uint8_t*)&AT_request_pack, 15);
+	return AT_OK;
+}
+
+AT_Status_t AT_request (AT_Request_Set_t* pack,AT_Receive_Read_t* get_pack){
+	clear_semaphore();
+	start_receive();
+
+	AT_request_pack.addr[0] = pack->addr >> 8;
+	AT_request_pack.addr[1] = pack->addr&0xff;
+	AT_request_pack.type[0] = pack->type;
+	AT_request_pack.data[0] = pack->data >> 8;
+	AT_request_pack.data[1] = pack->data&0xff;
+
+	AT_Send((uint8_t*)&AT_request_pack, 15);
+	wait_receive();
+	_is_send_ok();
+	start_receive();
+	wait_receive();
+	AT_receive_read_pack(get_pack);
 	return AT_OK;
 }
 
@@ -47,18 +78,14 @@ AT_Status_t AT_receive_read_pack (AT_Receive_Read_t* pack){
 
 	pack->data = (raw_pack->data[0] << 8) + raw_pack->data[1];
 	pack->source_addr = (raw_pack->source_addr[0] << 8) + raw_pack->source_addr[1];
+	pack->type = raw_pack->type;
 
 	return AT_OK;
 }
 
 AT_Status_t AT_confirm_return(uint16_t addr){
 
-	AT_Request_Set_t pack;
-	pack.addr = addr;
-	pack.type = MAIN_ACK;
-	pack.data = 0x00;
-
-	AT_request_send_pack(&pack);
+//	AT_request(pack, get_pack)
 	return AT_OK;
 }
 
@@ -87,6 +114,13 @@ AT_Status_t AT_check_reply(int reply_type){
 }
 
 int init_receive(){
+	if(osSemaphoreGetCount(at_receiveHandle) > 0){
+		osSemaphoreAcquire(at_receiveHandle, osWaitForever);
+	}
+	return AT_OK;
+}
+
+AT_Status_t clear_semaphore(){
 	if(osSemaphoreGetCount(at_receiveHandle) > 0){
 		osSemaphoreAcquire(at_receiveHandle, osWaitForever);
 	}

@@ -1,7 +1,0 @@
-EDGE_SENSOR:
-    IR_TRIGGER
-
-Problem:
-    无法处理多机访问
-
-TODO:

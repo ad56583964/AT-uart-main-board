@@ -18,6 +18,8 @@
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
+#include <at_test/at_tests.h>
+#include <sensor_test/sensor_test.h>
 #include "FreeRTOS.h"
 #include "task.h"
 #include "main.h"
@@ -27,8 +29,6 @@
 /* USER CODE BEGIN Includes */
 #include "at_cmd.h"
 #include "drv_uart/drv_uart.h"
-#include "at_test/tests.h"
-#include "sensor_test/sensor_test.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -71,6 +71,13 @@ const osThreadAttr_t shell_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for board_io */
+osThreadId_t board_ioHandle;
+const osThreadAttr_t board_io_attributes = {
+  .name = "board_io",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* Definitions for at_receive */
 osSemaphoreId_t at_receiveHandle;
 const osSemaphoreAttr_t at_receive_attributes = {
@@ -85,6 +92,7 @@ const osSemaphoreAttr_t at_receive_attributes = {
 void StartDefaultTask(void *argument);
 void ATProcessTask(void *argument);
 void shellTask(void *argument);
+void board_io_entry(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -127,6 +135,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of shell */
   shellHandle = osThreadNew(shellTask, NULL, &shell_attributes);
+
+  /* creation of board_io */
+  board_ioHandle = osThreadNew(board_io_entry, NULL, &board_io_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -199,6 +210,31 @@ void shellTask(void *argument)
     osDelay(1);
   }
   /* USER CODE END shellTask */
+}
+
+/* USER CODE BEGIN Header_board_io_entry */
+/**
+* @brief Function implementing the board_io thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_board_io_entry */
+void board_io_entry(void *argument)
+{
+  /* USER CODE BEGIN board_io_entry */
+  /* Infinite loop */
+//	int result = 0;
+//	while(1){
+//		result = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_10);
+//		if(result == 1){
+//			LOG("%d\n",result);
+//			osDelay(10);
+//		}
+//	}
+	for(;;){
+		osDelay(1);
+	}
+  /* USER CODE END board_io_entry */
 }
 
 /* Private application code --------------------------------------------------*/

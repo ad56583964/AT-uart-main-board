@@ -8,6 +8,6 @@
 #ifndef TESTS_TESTS_H_
 #define TESTS_TESTS_H_
 
-void test();
+void at_test();
 
 #endif /* TESTS_TESTS_H_ */

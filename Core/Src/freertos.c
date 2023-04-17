@@ -18,8 +18,6 @@
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
-#include <at_test/at_tests.h>
-#include <sensor_test/sensor_test.h>
 #include "FreeRTOS.h"
 #include "task.h"
 #include "main.h"
@@ -29,6 +27,7 @@
 /* USER CODE BEGIN Includes */
 #include "at_cmd.h"
 #include "drv_uart/drv_uart.h"
+#include "button/button.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,6 +47,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
+
+AT_mode_t AT_mode = IDLE;
 
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
@@ -71,12 +72,10 @@ const osThreadAttr_t shell_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for board_io */
-osThreadId_t board_ioHandle;
-const osThreadAttr_t board_io_attributes = {
-  .name = "board_io",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+/* Definitions for ButtonProcessTimer */
+osTimerId_t ButtonProcessTimerHandle;
+const osTimerAttr_t ButtonProcessTimer_attributes = {
+  .name = "ButtonProcessTimer"
 };
 /* Definitions for at_receive */
 osSemaphoreId_t at_receiveHandle;
@@ -92,7 +91,7 @@ const osSemaphoreAttr_t at_receive_attributes = {
 void StartDefaultTask(void *argument);
 void ATProcessTask(void *argument);
 void shellTask(void *argument);
-void board_io_entry(void *argument);
+void ButtonProcessTimerCallback(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -118,6 +117,10 @@ void MX_FREERTOS_Init(void) {
   /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
 
+  /* Create the timer(s) */
+  /* creation of ButtonProcessTimer */
+  ButtonProcessTimerHandle = osTimerNew(ButtonProcessTimerCallback, osTimerPeriodic, NULL, &ButtonProcessTimer_attributes);
+
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
@@ -135,9 +138,6 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of shell */
   shellHandle = osThreadNew(shellTask, NULL, &shell_attributes);
-
-  /* creation of board_io */
-  board_ioHandle = osThreadNew(board_io_entry, NULL, &board_io_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -159,7 +159,7 @@ void MX_FREERTOS_Init(void) {
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
-
+  osTimerStart(ButtonProcessTimerHandle, 20);
 
   /* Infinite loop */
   for(;;)
@@ -180,13 +180,42 @@ void ATProcessTask(void *argument)
 {
   /* USER CODE BEGIN ATProcessTask */
 
-	//test
-//	test();
+	AT_Init();
+	AT_check_addr();
 
   /* Infinite loop */
+
+	char _state = -1;
   for(;;)
   {
-    osDelay(1);
+
+	start_receive();
+	LOG("WAIT MESSAGE\n");
+	_state = wait_receive(osWaitForever);
+	if(_state == osOK){
+		AT_Receive_Read_t received_pack;
+		AT_receive_read_pack(&received_pack);
+		/*process_pack*/
+		AT_Request_Type_t type = received_pack.type;
+
+		AT_Request_Set_t request_pack;
+
+		UART1_printf("Mode:%d\n",AT_mode);
+		if(AT_mode == REG){
+			LOG("EnterREG\n");
+			if(type == REG_DEVICE){
+				AT_process_reg_device(&request_pack,&received_pack);
+				LOG("REG_Finish");
+			}
+			else{
+				LOG("RegError");
+			}
+			AT_mode = IDLE;
+		}
+		else if(AT_mode == POLLING){
+
+		}
+	}
   }
   /* USER CODE END ATProcessTask */
 }
@@ -201,8 +230,7 @@ void ATProcessTask(void *argument)
 void shellTask(void *argument)
 {
   /* USER CODE BEGIN shellTask */
-
-  sensor_test();
+//  sensor_test();
 
   /* Infinite loop */
   for(;;)
@@ -212,29 +240,13 @@ void shellTask(void *argument)
   /* USER CODE END shellTask */
 }
 
-/* USER CODE BEGIN Header_board_io_entry */
-/**
-* @brief Function implementing the board_io thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_board_io_entry */
-void board_io_entry(void *argument)
+/* ButtonProcessTimerCallback function */
+void ButtonProcessTimerCallback(void *argument)
 {
-  /* USER CODE BEGIN board_io_entry */
-  /* Infinite loop */
-//	int result = 0;
-//	while(1){
-//		result = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_10);
-//		if(result == 1){
-//			LOG("%d\n",result);
-//			osDelay(10);
-//		}
-//	}
-	for(;;){
-		osDelay(1);
-	}
-  /* USER CODE END board_io_entry */
+  /* USER CODE BEGIN ButtonProcessTimerCallback */
+	ButtonCallback();
+
+  /* USER CODE END ButtonProcessTimerCallback */
 }
 
 /* Private application code --------------------------------------------------*/

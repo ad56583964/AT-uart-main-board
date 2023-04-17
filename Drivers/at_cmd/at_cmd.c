@@ -22,10 +22,10 @@ AT_Status_t _is_send_ok(){
 	int result = 0;
 	result = strncmp(rxbuf,"OK\r\n",4);
 	if(result == 0){
-		LOG("send_sucess\n");
+		LOG("sendSucess\n");
 	}
 	else{
-		LOG("send_failed\n");
+		LOG("sendFailed\n");
 	}
 	return AT_OK;
 }
@@ -51,11 +51,14 @@ AT_Status_t AT_request (AT_Request_Set_t* pack,AT_Receive_Read_t* get_pack){
 	AT_request_pack.data[0] = pack->data >> 8;
 	AT_request_pack.data[1] = pack->data&0xff;
 
-	AT_Send((uint8_t*)&AT_request_pack, 15);
-	wait_receive();
-	_is_send_ok();
-	start_receive();
-	wait_receive();
+	char _state = -1;
+	while(_state != osOK){
+		AT_Send((uint8_t*)&AT_request_pack, 15);
+		_state = wait_receive(200);
+		_is_send_ok();
+		start_receive();
+		_state = wait_receive(200);
+	}
 	AT_receive_read_pack(get_pack);
 	return AT_OK;
 }
@@ -66,7 +69,6 @@ AT_Status_t _check_header_tail(AT_Receive_Read_t* pack){
 	}
 	return AT_OK;
 }
-
 
 AT_Status_t AT_receive_read_pack (AT_Receive_Read_t* pack){
 
@@ -125,9 +127,8 @@ AT_Status_t clear_semaphore(){
 	return AT_OK;
 }
 
-int wait_receive(){
-	osSemaphoreAcquire(at_receiveHandle, osWaitForever);
-	return AT_OK;
+int wait_receive(int timeout){
+	return 	osSemaphoreAcquire(at_receiveHandle, timeout);
 }
 
 int start_receive(){
@@ -155,7 +156,7 @@ int AT_Device_insert(uint16_t addr,uint8_t type){
 	int Size = AT_device_table.Size;
 	for(int i = Size; i > 0;i --){
 		if(AT_device_table.Device[i-1].address == addr){
-			LOG("add_Failed");
+			LOG("ALREADY_EXIST");
 			return ALREADY_EXIST;
 		}
 	}
@@ -183,8 +184,9 @@ AT_Status_t AT_process_reg_device(AT_Request_Set_t* request_pack,AT_Receive_Read
 	AT_request(request_pack,received_pack);
 	if(received_pack->type == EDGE_ACK){
 		//EDGE IS ACK
+
 		AT_Device_insert(REG_addr, REG_type);
-		LOG("REG_SUCCESS");
+		LOG("REG_SUCCESS\n");
 	}
 	return AT_OK;
 }
@@ -194,7 +196,7 @@ AT_Status_t AT_main_schedule(){
 	init_device_table();
 	while(1){
 		start_receive();
-		wait_receive();
+		wait_receive(200);
 		LOG(rxbuf);
 		osDelay(1);
 	}
@@ -205,7 +207,7 @@ AT_Status_t AT_first_request(){
 	start_receive();
 	AT_Send("AT\r\n",4);
 	int result = 0;
-	wait_receive();
+	wait_receive(200);
 	result = strncmp(rxbuf,"OK\r\n",4);
 	if(result != 0){
 		LOG("retry\n");
@@ -219,10 +221,11 @@ AT_Status_t AT_first_request(){
 int AT_check_addr(){
 	start_receive();
 	AT_Send("AT+MADDR\r\n",10);
-	wait_receive();
+	wait_receive(200);
 
 	int result = 0;
 	result = strncmp("+MADDR=0001\r\n",rxbuf,13);
+	UART1_printf("%s",rxbuf);
 	if(result == 0){
 		LOG("IS MainMachine\n");
 		set_mode(MAIN_DEVICE);
@@ -250,3 +253,22 @@ AT_Status_t AT_Init(){
 
 	return AT_ERROR;
 }
+
+//void reg_device(){
+//	start_receive();
+//	LOG("WAIT MESSAGE");
+//	wait_receive();
+//
+//
+//	AT_Receive_Read_t received_pack;
+//	AT_receive_read_pack(&received_pack);
+//	/*process_pack*/
+//	AT_Request_Type_t type = received_pack.type;
+//
+//	AT_Request_Set_t request_pack;
+//	// is REG_DEVICE request
+//	/*REG_DEVICE*/
+//	if(type == REG_DEVICE){
+//		AT_process_reg_device(&request_pack,&received_pack);
+//	}
+//}

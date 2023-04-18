@@ -136,10 +136,10 @@ int start_receive(){
 	return AT_OK;
 }
 
-int open_receive(){
-	HAL_UARTEx_ReceiveToIdle_DMA(&huart2,(uint8_t*)&rxbuf,RX_BUF_SIZE);
-	return AT_OK;
-}
+//int open_receive(){
+//	HAL_UARTEx_ReceiveToIdle_DMA(&huart2,(uint8_t*)&rxbuf,RX_BUF_SIZE);
+//	return AT_OK;
+//}
 
 int decode_AT(){
 
@@ -156,7 +156,7 @@ int AT_Device_insert(uint16_t addr,uint8_t type){
 	int Size = AT_device_table.Size;
 	for(int i = Size; i > 0;i --){
 		if(AT_device_table.Device[i-1].address == addr){
-			LOG("ALREADY_EXIST");
+			LOG("ALREADY_EXIST\n");
 			return ALREADY_EXIST;
 		}
 	}

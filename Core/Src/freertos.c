@@ -190,7 +190,7 @@ void ATProcessTask(void *argument)
   {
 
 	start_receive();
-	LOG("WAIT MESSAGE\n");
+	LOG("WaitMessage\n");
 	_state = wait_receive(osWaitForever);
 	if(_state == osOK){
 		AT_Receive_Read_t received_pack;
@@ -205,15 +205,15 @@ void ATProcessTask(void *argument)
 			LOG("EnterREG\n");
 			if(type == REG_DEVICE){
 				AT_process_reg_device(&request_pack,&received_pack);
-				LOG("REG_Finish");
+				LOG("RegFinish\n");
 			}
 			else{
-				LOG("RegError");
+				LOG("RegError\n");
 			}
 			AT_mode = IDLE;
 		}
 		else if(AT_mode == POLLING){
-
+			LOG("PollingOnce\n");
 		}
 	}
   }

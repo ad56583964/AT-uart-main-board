@@ -57,6 +57,7 @@ AT_Status_t AT_request (AT_Request_Set_t* pack,AT_Receive_Read_t* get_pack){
 	start_receive();
 	wait_receive();
 	AT_receive_read_pack(get_pack);
+	LOG("received pack\n");
 	return AT_OK;
 }
 
@@ -66,7 +67,6 @@ AT_Status_t _check_header_tail(AT_Receive_Read_t* pack){
 	}
 	return AT_OK;
 }
-
 
 AT_Status_t AT_receive_read_pack (AT_Receive_Read_t* pack){
 
@@ -184,13 +184,12 @@ AT_Status_t AT_process_reg_device(AT_Request_Set_t* request_pack,AT_Receive_Read
 	if(received_pack->type == EDGE_ACK){
 		//EDGE IS ACK
 		AT_Device_insert(REG_addr, REG_type);
-		LOG("REG_SUCCESS");
+		LOG("REG_SUCCESS\n");
 	}
 	return AT_OK;
 }
 
 AT_Status_t AT_main_schedule(){
-
 	init_device_table();
 	while(1){
 		start_receive();
@@ -223,6 +222,7 @@ int AT_check_addr(){
 
 	int result = 0;
 	result = strncmp("+MADDR=0001\r\n",rxbuf,13);
+	UART1_printf("%s",rxbuf);
 	if(result == 0){
 		LOG("IS MainMachine\n");
 		set_mode(MAIN_DEVICE);
@@ -247,6 +247,25 @@ AT_Status_t AT_Init(){
 
 	LOG("Please Reset\n");
 	osDelay(500);
-
+	while(1);
 	return AT_ERROR;
 }
+
+//void reg_device(){
+//	start_receive();
+//	LOG("WAIT MESSAGE");
+//	wait_receive();
+//
+//
+//	AT_Receive_Read_t received_pack;
+//	AT_receive_read_pack(&received_pack);
+//	/*process_pack*/
+//	AT_Request_Type_t type = received_pack.type;
+//
+//	AT_Request_Set_t request_pack;
+//	// is REG_DEVICE request
+//	/*REG_DEVICE*/
+//	if(type == REG_DEVICE){
+//		AT_process_reg_device(&request_pack,&received_pack);
+//	}
+//}

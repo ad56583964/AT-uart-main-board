@@ -49,7 +49,7 @@ void test_connect_receive(){
 			break;
 		}
 		case EDGE_DEVICE :{
-			/*AT_EDHE_schedule();*/
+			/*AT_EDGE_schedule();*/
 			break;
 		}
 		case UNKNOWN :{
@@ -153,10 +153,8 @@ void test_receive_pack_once(){
 			break;
 		}
 	}
-
 	LOG(rxbuf);
 	osDelay(1);
-
 }
 
 void test_AT_request(){

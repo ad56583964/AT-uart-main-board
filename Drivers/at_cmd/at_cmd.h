@@ -18,7 +18,12 @@
 #define LOG UART1_printf
 #define AT_Send( str , size ) _uart2_write( (uint8_t*)str , size )
 
-
+typedef enum _AT_mode_t{
+	IDLE,
+	REG,
+	POLLING,
+	ALARM
+}AT_mode_t;
 
 typedef enum _AT_Status_t
 {

@@ -99,7 +99,7 @@ void ButtonCallback(){
 		button[1].state = IS_UP;
 		if(button[1].event_state == IS_PUSHED){
 			pushed02_callback();
-			button[0].event_state = IS_UP;
+			button[1].event_state = IS_UP;
 		}
 	}
 

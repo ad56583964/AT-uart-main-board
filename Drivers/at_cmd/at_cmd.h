@@ -31,6 +31,8 @@ typedef enum _AT_Status_t
 	AT_ERROR
 } AT_Status_t;
 
+AT_Status_t AT_process_polling();
+
 //typedef enum
 //{
 //	SHELL_OK,
@@ -43,7 +45,8 @@ typedef enum _AT_Request_Type_t{
 	SMOKE_DEVICE,
 	IR_DEVICE,
 	MAIN_ACK,
-	EDGE_ACK
+	EDGE_ACK,
+	EDGE_ALARM
 }AT_Request_Type_t;
 
 typedef enum _EDGE_Type_t{
@@ -131,7 +134,7 @@ int AT_Device_insert(uint16_t addr,uint8_t type);
 int AT_check_addr();
 int init_receive();
 
-int wait_receive(int timeout);
+int wait_receive(uint32_t timeout);
 int open_receive();
 int start_receive();
 AT_Status_t clear_semaphore();

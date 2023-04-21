@@ -210,6 +210,7 @@ void USART2_IRQHandler(void)
   HAL_UART_IRQHandler(&huart2);
   /* USER CODE BEGIN USART2_IRQn 1 */
   osSemaphoreRelease(at_receiveHandle);
+//  HAL_UARTEx_ReceiveToIdle_DMA(&huart2,(uint8_t*)&rxbuf,RX_BUF_SIZE);
   /* USER CODE END USART2_IRQn 1 */
 }
 

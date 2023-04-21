@@ -10,7 +10,7 @@
 
 #include "usart.h"
 
-#define RX_BUF_SIZE 20
+#define RX_BUF_SIZE 40
 
 extern char rxbuf[RX_BUF_SIZE];
 

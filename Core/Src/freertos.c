@@ -28,6 +28,8 @@
 #include "at_cmd.h"
 #include "drv_uart/drv_uart.h"
 #include "button/button.h"
+#include "main_app.h"
+#include "ssd1306/ssd1306.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,7 +50,7 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 
-AT_mode_t AT_mode = IDLE;
+AT_mode_t g_AT_mode = IDLE;
 
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
@@ -62,13 +64,20 @@ const osThreadAttr_t defaultTask_attributes = {
 osThreadId_t ATProcessHandle;
 const osThreadAttr_t ATProcess_attributes = {
   .name = "ATProcess",
-  .stack_size = 128 * 4,
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for shell */
 osThreadId_t shellHandle;
 const osThreadAttr_t shell_attributes = {
   .name = "shell",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for display */
+osThreadId_t displayHandle;
+const osThreadAttr_t display_attributes = {
+  .name = "display",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
@@ -91,6 +100,7 @@ const osSemaphoreAttr_t at_receive_attributes = {
 void StartDefaultTask(void *argument);
 void ATProcessTask(void *argument);
 void shellTask(void *argument);
+void displaytask(void *argument);
 void ButtonProcessTimerCallback(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -139,6 +149,9 @@ void MX_FREERTOS_Init(void) {
   /* creation of shell */
   shellHandle = osThreadNew(shellTask, NULL, &shell_attributes);
 
+  /* creation of display */
+  displayHandle = osThreadNew(displaytask, NULL, &display_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -185,38 +198,19 @@ void ATProcessTask(void *argument)
 
   /* Infinite loop */
 
-	char _state = -1;
-  for(;;)
-  {
-
-	start_receive();
-	LOG("WaitMessage\n");
-	_state = wait_receive(osWaitForever);
-	if(_state == osOK){
-		AT_Receive_Read_t received_pack;
-		AT_receive_read_pack(&received_pack);
-		/*process_pack*/
-		AT_Request_Type_t type = received_pack.type;
-
-		AT_Request_Set_t request_pack;
-
-		UART1_printf("Mode:%d\n",AT_mode);
-		if(AT_mode == REG){
-			LOG("EnterREG\n");
-			if(type == REG_DEVICE){
-				AT_process_reg_device(&request_pack,&received_pack);
-				LOG("RegFinish\n");
-			}
-			else{
-				LOG("RegError\n");
-			}
-			AT_mode = IDLE;
+	for(;;)
+	{
+		if(g_AT_mode == REG){
+			reg_process();
 		}
-		else if(AT_mode == POLLING){
-			LOG("PollingOnce\n");
+		else if(g_AT_mode == POLLING){
+			polling_process();
+		}
+		else if(g_AT_mode == IDLE){
+			LOG("Idle\n");
+			osDelay(1000);
 		}
 	}
-  }
   /* USER CODE END ATProcessTask */
 }
 
@@ -238,6 +232,28 @@ void shellTask(void *argument)
     osDelay(1);
   }
   /* USER CODE END shellTask */
+}
+
+/* USER CODE BEGIN Header_displaytask */
+/**
+* @brief Function implementing the display thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_displaytask */
+void displaytask(void *argument)
+{
+  /* USER CODE BEGIN displaytask */
+	ssd1306_Init();
+	ssd1306_Fill(White);
+	ssd1306_UpdateScreen();
+  /* Infinite loop */
+  for(;;)
+  {
+	oledshow();
+    osDelay(1);
+  }
+  /* USER CODE END displaytask */
 }
 
 /* ButtonProcessTimerCallback function */

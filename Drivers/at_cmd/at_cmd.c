@@ -31,6 +31,9 @@ AT_Status_t _is_send_ok(){
 }
 
 AT_Status_t AT_request_send_pack (AT_Request_Set_t* pack){
+	clear_semaphore();
+	start_receive();
+
 	AT_request_pack.addr[0] = pack->addr >> 8;
 	AT_request_pack.addr[1] = pack->addr&0xff;
 	AT_request_pack.type[0] = pack->type;
@@ -38,6 +41,10 @@ AT_Status_t AT_request_send_pack (AT_Request_Set_t* pack){
 	AT_request_pack.data[1] = pack->data&0xff;
 
 	AT_Send((uint8_t*)&AT_request_pack, 15);
+
+	wait_receive(200);
+	_is_send_ok();
+
 	return AT_OK;
 }
 
@@ -127,13 +134,13 @@ AT_Status_t clear_semaphore(){
 	return AT_OK;
 }
 
-int wait_receive(int timeout){
+int wait_receive(uint32_t timeout){
 	return 	osSemaphoreAcquire(at_receiveHandle, timeout);
 }
 
 int start_receive(){
-	HAL_UARTEx_ReceiveToIdle_DMA(&huart2,(uint8_t*)&rxbuf,RX_BUF_SIZE);
-	return AT_OK;
+//	return AT_OK;
+	return HAL_UARTEx_ReceiveToIdle_DMA(&huart2,(uint8_t*)&rxbuf,RX_BUF_SIZE);
 }
 
 //int open_receive(){
@@ -173,6 +180,14 @@ int init_device_table(){
 	return AT_OK;
 }
 
+AT_Status_t AT_process_polling(){
+	for(int i = 0; i < AT_device_table.Size; i++){
+		LOG("PollingOnce");
+		osDelay(100);
+	}
+	return AT_OK;
+}
+
 AT_Status_t AT_process_reg_device(AT_Request_Set_t* request_pack,AT_Receive_Read_t* received_pack){
 	uint16_t REG_addr = received_pack->source_addr;
 	uint16_t REG_type = received_pack->data&0xFF;
@@ -187,6 +202,10 @@ AT_Status_t AT_process_reg_device(AT_Request_Set_t* request_pack,AT_Receive_Read
 
 		AT_Device_insert(REG_addr, REG_type);
 		LOG("REG_SUCCESS\n");
+	}
+	else{
+		LOG("REG_Failed");
+		osDelay(1000);
 	}
 	return AT_OK;
 }

@@ -56,15 +56,15 @@ Button_t button[2];
 
 char cur_state = IS_UP;
 
-extern AT_mode_t AT_mode;
+extern AT_mode_t g_AT_mode;
 
 void pushed01_callback(){
-	AT_mode = REG;
+	g_AT_mode = REG;
 	LOG("REG\n");
 }
 
 void pushed02_callback(){
-	AT_mode = POLLING;
+	g_AT_mode = POLLING;
 	LOG("POLLING\n");
 }
 

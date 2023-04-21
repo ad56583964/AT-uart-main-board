@@ -20,6 +20,7 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "dma.h"
+#include "i2c.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -91,6 +92,7 @@ int main(void)
   MX_DMA_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
+  MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
 
 //  HAL_UART_Receive_IT(&huart2,(uint8_t*)&rxbuf,RX_BUF_SIZE);
@@ -102,7 +104,6 @@ int main(void)
 
   /* Start scheduler */
   osKernelStart();
-
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */

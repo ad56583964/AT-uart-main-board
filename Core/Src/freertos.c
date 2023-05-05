@@ -65,7 +65,7 @@ osThreadId_t ATProcessHandle;
 const osThreadAttr_t ATProcess_attributes = {
   .name = "ATProcess",
   .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityHigh,
 };
 /* Definitions for shell */
 osThreadId_t shellHandle;
@@ -247,11 +247,14 @@ void displaytask(void *argument)
 	ssd1306_Init();
 	ssd1306_Fill(White);
 	ssd1306_UpdateScreen();
+//	device_show_test();
   /* Infinite loop */
   for(;;)
   {
+	ssd1306_Fill(White);
 	oledshow();
-    osDelay(1);
+	ssd1306_UpdateScreen();
+    osDelay(100);
   }
   /* USER CODE END displaytask */
 }

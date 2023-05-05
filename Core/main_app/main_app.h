@@ -12,4 +12,7 @@ void polling_process();
 
 void reg_process();
 
+void device_show_test();
+void oledshow();
+
 #endif /* MAIN_APP_MAIN_APP_H_ */

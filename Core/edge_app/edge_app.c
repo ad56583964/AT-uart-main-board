@@ -14,12 +14,14 @@ static AT_Receive_Read_t get_pack;
 
 static uint32_t pv_smoke_adc;
 
+#define EDGE_DEVICE_TYPE EDGE_SMOKE
+
 void edge_process_reg(){
 	osDelay(1000);
 	LOG("Need Pair\n");
 	while(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_11) != 1);
 	pack.addr = 0x0001;
-	pack.data = EDGE_IR;
+	pack.data = EDGE_DEVICE_TYPE;
 	pack.type = REG_DEVICE;
 	LOG("Send Request\n");
 	AT_request(&pack,&get_pack);

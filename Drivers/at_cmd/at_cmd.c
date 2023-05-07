@@ -42,8 +42,6 @@ AT_Status_t AT_request_send_pack (AT_Request_Set_t* pack){
 }
 
 AT_Status_t AT_request (AT_Request_Set_t* pack,AT_Receive_Read_t* get_pack){
-	clear_semaphore();
-	start_receive();
 
 	AT_request_pack.addr[0] = pack->addr >> 8;
 	AT_request_pack.addr[1] = pack->addr&0xff;
@@ -53,6 +51,8 @@ AT_Status_t AT_request (AT_Request_Set_t* pack,AT_Receive_Read_t* get_pack){
 
 	char _state = -1;
 	while(_state != osOK){
+		clear_semaphore();
+		start_receive();
 		AT_Send((uint8_t*)&AT_request_pack, 15);
 		_state = wait_receive(200);
 		_is_send_ok();

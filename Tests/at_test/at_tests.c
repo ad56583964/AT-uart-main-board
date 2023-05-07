@@ -24,7 +24,7 @@ void test_setpack(){
 void test_register(){
 
 	start_receive();
-	wait_receive();
+	wait_receive(osWaitForever);
 
 	AT_Receive_Read_t pack;
 	AT_receive_read_pack(&pack);
@@ -49,7 +49,7 @@ void test_connect_receive(){
 			break;
 		}
 		case EDGE_DEVICE :{
-			/*AT_EDGE_schedule();*/
+			/*AT_EDHE_schedule();*/
 			break;
 		}
 		case UNKNOWN :{
@@ -70,7 +70,7 @@ void test_receive_pack_REG_DEVICE_once(){
 	/*loop_once*/
 	start_receive();
 	LOG("WAIT MESSAGE");
-	wait_receive();
+	wait_receive(osWaitForever);
 
 	AT_Receive_Read_t received_pack;
 	AT_receive_read_pack(&received_pack);
@@ -129,7 +129,7 @@ void test_receive_pack_once(){
 	/*AT_main_schedule()*/
 	/*loop_once*/
 	start_receive();
-	wait_receive();
+	wait_receive(osWaitForever);
 
 	AT_Receive_Read_t pack;
 	AT_receive_read_pack(&pack);

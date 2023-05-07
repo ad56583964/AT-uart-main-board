@@ -1,0 +1,126 @@
+{
+  "name": "main_board",
+  "type": "ARM",
+  "dependenceList": [],
+  "srcDirs": [
+    ".eide/deps",
+    "Tests",
+    "Core",
+    "Middlewares",
+    "Drivers"
+  ],
+  "virtualFolder": {
+    "name": "<virtual_root>",
+    "files": [],
+    "folders": []
+  },
+  "outDir": "build",
+  "deviceName": null,
+  "packDir": null,
+  "miscInfo": {
+    "uid": "1f0c8990a238fd098a85500b545a88bf"
+  },
+  "targets": {
+    "Debug": {
+      "excludeList": [],
+      "toolchain": "GCC",
+      "compileConfig": {
+        "cpuType": "Cortex-M3",
+        "floatingPointHardware": "none",
+        "scatterFilePath": "",
+        "useCustomScatterFile": true,
+        "storageLayout": {
+          "RAM": [],
+          "ROM": []
+        },
+        "options": "null"
+      },
+      "uploader": "JLink",
+      "uploadConfig": {
+        "bin": "",
+        "baseAddr": "",
+        "cpuInfo": {
+          "vendor": "null",
+          "cpuName": "null"
+        },
+        "proType": 1,
+        "speed": 8000,
+        "otherCmds": ""
+      },
+      "uploadConfigMap": {},
+      "custom_dep": {
+        "name": "default",
+        "incList": [
+          "Core/Inc",
+          "Drivers/STM32F1xx_HAL_Driver/Inc/Legacy",
+          "Drivers/STM32F1xx_HAL_Driver/Inc",
+          "Drivers/CMSIS/Device/ST/STM32F1xx/Include",
+          "Drivers/CMSIS/Include",
+          "Middlewares/Third_Party/FreeRTOS/Source/include",
+          "Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2",
+          "Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3",
+          "edge_board/Drivers/bsp",
+          "edge_board/Tests",
+          "edge_board/Drivers/at_cmd",
+          "edge_board/Drivers",
+          ".eide/deps"
+        ],
+        "libList": [],
+        "sourceDirList": [],
+        "defineList": [
+          "DEBUG",
+          "USE_HAL_DRIVER",
+          "STM32F103xB"
+        ]
+      }
+    },
+    "Release": {
+      "excludeList": [],
+      "toolchain": "GCC",
+      "compileConfig": {
+        "cpuType": "Cortex-M3",
+        "floatingPointHardware": "none",
+        "scatterFilePath": "",
+        "useCustomScatterFile": true,
+        "storageLayout": {
+          "RAM": [],
+          "ROM": []
+        },
+        "options": "null"
+      },
+      "uploader": "JLink",
+      "uploadConfig": {
+        "bin": "",
+        "baseAddr": "",
+        "cpuInfo": {
+          "vendor": "null",
+          "cpuName": "null"
+        },
+        "proType": 1,
+        "speed": 8000,
+        "otherCmds": ""
+      },
+      "uploadConfigMap": {},
+      "custom_dep": {
+        "name": "default",
+        "incList": [
+          "Core/Inc",
+          "Drivers/STM32F1xx_HAL_Driver/Inc/Legacy",
+          "Drivers/STM32F1xx_HAL_Driver/Inc",
+          "Drivers/CMSIS/Device/ST/STM32F1xx/Include",
+          "Drivers/CMSIS/Include",
+          "Middlewares/Third_Party/FreeRTOS/Source/include",
+          "Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2",
+          "Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3"
+        ],
+        "defineList": [
+          "USE_HAL_DRIVER",
+          "STM32F103xB"
+        ],
+        "sourceDirList": [],
+        "libList": []
+      }
+    }
+  },
+  "version": "3.3"
+}

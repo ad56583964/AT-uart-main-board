@@ -22,10 +22,10 @@ AT_Status_t _is_send_ok(){
 	int result = 0;
 	result = strncmp(rxbuf,"OK\r\n",4);
 	if(result == 0){
-		LOG("send_sucess\n");
+		LOG("sendSucess\n");
 	}
 	else{
-		LOG("send_failed\n");
+		LOG("sendFailed\n");
 	}
 	return AT_OK;
 }
@@ -51,13 +51,15 @@ AT_Status_t AT_request (AT_Request_Set_t* pack,AT_Receive_Read_t* get_pack){
 	AT_request_pack.data[0] = pack->data >> 8;
 	AT_request_pack.data[1] = pack->data&0xff;
 
-	AT_Send((uint8_t*)&AT_request_pack, 15);
-	wait_receive();
-	_is_send_ok();
-	start_receive();
-	wait_receive();
+	char _state = -1;
+	while(_state != osOK){
+		AT_Send((uint8_t*)&AT_request_pack, 15);
+		_state = wait_receive(200);
+		_is_send_ok();
+		start_receive();
+		_state = wait_receive(200);
+	}
 	AT_receive_read_pack(get_pack);
-	LOG("received pack\n");
 	return AT_OK;
 }
 
@@ -125,9 +127,8 @@ AT_Status_t clear_semaphore(){
 	return AT_OK;
 }
 
-int wait_receive(){
-	osSemaphoreAcquire(at_receiveHandle, osWaitForever);
-	return AT_OK;
+int wait_receive(int timeout){
+	return 	osSemaphoreAcquire(at_receiveHandle, timeout);
 }
 
 int start_receive(){
@@ -135,10 +136,10 @@ int start_receive(){
 	return AT_OK;
 }
 
-int open_receive(){
-	HAL_UARTEx_ReceiveToIdle_DMA(&huart2,(uint8_t*)&rxbuf,RX_BUF_SIZE);
-	return AT_OK;
-}
+//int open_receive(){
+//	HAL_UARTEx_ReceiveToIdle_DMA(&huart2,(uint8_t*)&rxbuf,RX_BUF_SIZE);
+//	return AT_OK;
+//}
 
 int decode_AT(){
 
@@ -155,7 +156,7 @@ int AT_Device_insert(uint16_t addr,uint8_t type){
 	int Size = AT_device_table.Size;
 	for(int i = Size; i > 0;i --){
 		if(AT_device_table.Device[i-1].address == addr){
-			LOG("add_Failed");
+			LOG("ALREADY_EXIST\n");
 			return ALREADY_EXIST;
 		}
 	}
@@ -172,6 +173,14 @@ int init_device_table(){
 	return AT_OK;
 }
 
+AT_Status_t AT_process_polling(){
+	for(int i = 0; i < AT_device_table.Size; i++){
+		LOG("PollingOnce");
+		osDelay(100);
+	}
+	return AT_OK;
+}
+
 AT_Status_t AT_process_reg_device(AT_Request_Set_t* request_pack,AT_Receive_Read_t* received_pack){
 	uint16_t REG_addr = received_pack->source_addr;
 	uint16_t REG_type = received_pack->data&0xFF;
@@ -183,6 +192,7 @@ AT_Status_t AT_process_reg_device(AT_Request_Set_t* request_pack,AT_Receive_Read
 	AT_request(request_pack,received_pack);
 	if(received_pack->type == EDGE_ACK){
 		//EDGE IS ACK
+
 		AT_Device_insert(REG_addr, REG_type);
 		LOG("REG_SUCCESS\n");
 	}
@@ -190,10 +200,11 @@ AT_Status_t AT_process_reg_device(AT_Request_Set_t* request_pack,AT_Receive_Read
 }
 
 AT_Status_t AT_main_schedule(){
+
 	init_device_table();
 	while(1){
 		start_receive();
-		wait_receive();
+		wait_receive(200);
 		LOG(rxbuf);
 		osDelay(1);
 	}
@@ -204,7 +215,7 @@ AT_Status_t AT_first_request(){
 	start_receive();
 	AT_Send("AT\r\n",4);
 	int result = 0;
-	wait_receive();
+	wait_receive(200);
 	result = strncmp(rxbuf,"OK\r\n",4);
 	if(result != 0){
 		LOG("retry\n");
@@ -218,7 +229,7 @@ AT_Status_t AT_first_request(){
 int AT_check_addr(){
 	start_receive();
 	AT_Send("AT+MADDR\r\n",10);
-	wait_receive();
+	wait_receive(200);
 
 	int result = 0;
 	result = strncmp("+MADDR=0001\r\n",rxbuf,13);
@@ -247,7 +258,7 @@ AT_Status_t AT_Init(){
 
 	LOG("Please Reset\n");
 	osDelay(500);
-	while(1);
+
 	return AT_ERROR;
 }
 

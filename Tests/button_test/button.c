@@ -7,13 +7,13 @@
 
 
 
-void button_scan(){
-
-}
-
-void button_test(){
-	while(1){
-		button_scan();
-		osDelay(20);
-	}
-}
+//void button_scan(){
+//
+//}
+//
+//void button_test(){
+//	while(1){
+//		button_scan();
+//		osDelay(20);
+//	}
+//}

@@ -27,6 +27,8 @@
 /* USER CODE BEGIN Includes */
 #include "at_cmd.h"
 #include "drv_uart/drv_uart.h"
+#include "button/button.h"
+#include "edge_app.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,6 +51,7 @@
 
 AT_mode_t AT_mode = IDLE;
 
+
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
@@ -61,7 +64,7 @@ const osThreadAttr_t defaultTask_attributes = {
 osThreadId_t ATProcessHandle;
 const osThreadAttr_t ATProcess_attributes = {
   .name = "ATProcess",
-  .stack_size = 128 * 4,
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for shell */
@@ -177,29 +180,9 @@ void StartDefaultTask(void *argument)
 
 #define PACK_LENGTH 15
 
-void process_reg(){
-	osDelay(1000);
-	LOG("Need Pair\n");
-	while(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_11) != 1);
-	AT_Request_Set_t pack;
-	AT_Receive_Read_t get_pack;
-	pack.addr = 0x0001;
-	pack.data = EDGE_IR;
-	pack.type = REG_DEVICE;
-	LOG("Send Request\n");
-	AT_request(&pack,&get_pack);
-	if(get_pack.type == MAIN_ACK){
-		pack.addr = 0x0001;
-		pack.data = 0;
-		pack.type = EDGE_ACK;
-		AT_request_send_pack(&pack);
-	}
-	LOG("Requested\n");
-}
 
-void main_loop(){
 
-}
+
 /* USER CODE END Header_ATProcessTask */
 void ATProcessTask(void *argument)
 {
@@ -208,16 +191,16 @@ void ATProcessTask(void *argument)
 	AT_Init();
 	AT_check_addr();
 	if(AT_device_mode != EDGE_DEVICE){
-		ERROR;
+//		ERROR;
 	}
 //	char my_addr =
 //	wait_ack();
 //	edge_register();
 	for(;;)
 	{
-		process_reg();
+		edge_process_reg();
 		LOG("WaitingCmd");
-		main_loop();
+		edge_main_loop();
 		while(1);
 	}
   /* USER CODE END ATProcessTask */

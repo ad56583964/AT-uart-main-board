@@ -12,9 +12,11 @@
 static AT_Request_Set_t pack;
 static AT_Receive_Read_t get_pack;
 
-static uint32_t pv_smoke_adc;
+static uint32_t pv_smoke_adc = 0;
+static uint32_t pv_DOOR = 0;
 
-#define EDGE_DEVICE_TYPE EDGE_SMOKE
+
+#define EDGE_DEVICE_TYPE EDGE_DOOR
 
 void edge_process_reg(){
 	osDelay(1000);
@@ -39,9 +41,9 @@ void edge_main_loop(){
 //		sensor_check
 		HAL_ADC_Start(&hadc1);
 		HAL_ADC_PollForConversion(&hadc1,1);
-		pv_smoke_adc = HAL_ADC_GetValue(&hadc1);
+		pv_DOOR = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_14) == 1;
 		LOG("%d\n",pv_smoke_adc);
-		if( pv_smoke_adc>2000 || HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_10) == 1){
+		if(pv_DOOR == 1 || HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_10) == 1){
 			LOG("Alarming");
 			pack.addr = 0x0001;
 			pack.type = EDGE_ALARM;

@@ -251,10 +251,10 @@ void displaytask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	ssd1306_Fill(White);
-	oledshow();
-	ssd1306_UpdateScreen();
-    osDelay(100);
+    ssd1306_Fill(White);
+    oledshow();
+    ssd1306_UpdateScreen();
+    osDelay(233);
   }
   /* USER CODE END displaytask */
 }

@@ -49,8 +49,6 @@ AT_Status_t AT_request_send_pack (AT_Request_Set_t* pack){
 }
 
 AT_Status_t AT_request (AT_Request_Set_t* pack,AT_Receive_Read_t* get_pack){
-	clear_semaphore();
-	start_receive();
 
 	AT_request_pack.addr[0] = pack->addr >> 8;
 	AT_request_pack.addr[1] = pack->addr&0xff;
@@ -59,12 +57,19 @@ AT_Status_t AT_request (AT_Request_Set_t* pack,AT_Receive_Read_t* get_pack){
 	AT_request_pack.data[1] = pack->data&0xff;
 
 	char _state = -1;
-	while(_state != osOK){
+	char failed_count = 0;
+	while(_state != osOK && failed_count < 5){
+		clear_semaphore();
+		start_receive();
 		AT_Send((uint8_t*)&AT_request_pack, 15);
 		_state = wait_receive(200);
 		_is_send_ok();
 		start_receive();
 		_state = wait_receive(200);
+		failed_count ++;
+	}
+	if(failed_count >= 5){
+		return AT_ERROR;
 	}
 	AT_receive_read_pack(get_pack);
 	return AT_OK;
@@ -134,11 +139,11 @@ AT_Status_t clear_semaphore(){
 	return AT_OK;
 }
 
-int wait_receive(uint32_t timeout){
+inline int wait_receive(uint32_t timeout){
 	return 	osSemaphoreAcquire(at_receiveHandle, timeout);
 }
 
-int start_receive(){
+inline int start_receive(){
 //	return AT_OK;
 	return HAL_UARTEx_ReceiveToIdle_DMA(&huart2,(uint8_t*)&rxbuf,RX_BUF_SIZE);
 }
@@ -155,12 +160,12 @@ int decode_AT(){
 }
 
 AT_Device_Table_t AT_device_table = {
-	.Size = 0
+	.size = 0
 };
 
 
 int AT_Device_insert(uint16_t addr,uint8_t type){
-	int Size = AT_device_table.Size;
+	int Size = AT_device_table.size;
 	for(int i = Size; i > 0;i --){
 		if(AT_device_table.Device[i-1].address == addr){
 			LOG("ALREADY_EXIST\n");
@@ -170,7 +175,8 @@ int AT_Device_insert(uint16_t addr,uint8_t type){
 	Size++;
 	AT_device_table.Device[Size - 1].address = addr;
 	AT_device_table.Device[Size - 1].type = type;
-	AT_device_table.Size = Size;
+	AT_device_table.Device[Size - 1].state = DEVICE_IDLE;
+	AT_device_table.size = Size;
 	return ADD_SUCCESS;
 }
 
@@ -181,7 +187,7 @@ int init_device_table(){
 }
 
 AT_Status_t AT_process_polling(){
-	for(int i = 0; i < AT_device_table.Size; i++){
+	for(int i = 0; i < AT_device_table.size; i++){
 		LOG("PollingOnce");
 		osDelay(100);
 	}
@@ -223,10 +229,11 @@ AT_Status_t AT_main_schedule(){
 }
 
 AT_Status_t AT_first_request(){
+	clear_semaphore();
 	start_receive();
 	AT_Send("AT\r\n",4);
 	int result = 0;
-	wait_receive(200);
+	wait_receive(500);
 	result = strncmp(rxbuf,"OK\r\n",4);
 	if(result != 0){
 		LOG("retry\n");
@@ -257,7 +264,9 @@ int AT_check_addr(){
 }
 
 AT_Status_t AT_Init(){
-	init_receive();
+//	init_receive();
+	clear_semaphore();
+	start_receive();
 
 	for(int i = 5; i > 0; i--){
 		if(AT_first_request() == AT_OK){
@@ -272,22 +281,3 @@ AT_Status_t AT_Init(){
 
 	return AT_ERROR;
 }
-
-//void reg_device(){
-//	start_receive();
-//	LOG("WAIT MESSAGE");
-//	wait_receive();
-//
-//
-//	AT_Receive_Read_t received_pack;
-//	AT_receive_read_pack(&received_pack);
-//	/*process_pack*/
-//	AT_Request_Type_t type = received_pack.type;
-//
-//	AT_Request_Set_t request_pack;
-//	// is REG_DEVICE request
-//	/*REG_DEVICE*/
-//	if(type == REG_DEVICE){
-//		AT_process_reg_device(&request_pack,&received_pack);
-//	}
-//}

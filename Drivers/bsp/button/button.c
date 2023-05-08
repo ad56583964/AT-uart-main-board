@@ -17,6 +17,9 @@
 #include "stm32f1xx.h"
 #include "cmsis_os.h"
 #include "at_cmd.h"
+#include "main_app.h"
+
+extern AT_Device_Table_t AT_device_table;
 
 extern osTimerId_t ButtonProcessTimerHandle;
 
@@ -57,15 +60,33 @@ Button_t button[2];
 char cur_state = IS_UP;
 
 extern AT_mode_t g_AT_mode;
+AT_mode_t cur_AT_mode;
+
+
 
 void pushed01_callback(){
+	cur_AT_mode = g_AT_mode;
 	g_AT_mode = REG;
 	LOG("REG\n");
 }
 
+void clear_alarming(){
+	for(int i = 0; i < AT_device_table.size; i++){
+		if(AT_device_table.Device[i].state == DEVICE_ALARMING){
+			AT_device_table.Device[i].state = DEVICE_IDLE;
+		}
+	}
+	close_alarm();
+}
+
 void pushed02_callback(){
+	cur_AT_mode = g_AT_mode;
 	g_AT_mode = POLLING;
 	LOG("POLLING\n");
+
+	if(g_AT_mode == cur_AT_mode){
+		clear_alarming();
+	}
 }
 
 
@@ -131,5 +152,3 @@ void ButtonCallback_old(){
 
 	cur_state = state;
 }
-
-

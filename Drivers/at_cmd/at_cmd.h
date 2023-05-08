@@ -46,7 +46,8 @@ typedef enum _AT_Request_Type_t{
 	IR_DEVICE,
 	MAIN_ACK,
 	EDGE_ACK,
-	EDGE_ALARM
+	EDGE_ALARM,
+	BEAT
 }AT_Request_Type_t;
 
 typedef enum _EDGE_Type_t{
@@ -63,6 +64,12 @@ enum{
 enum {
 	AT_TEST = 0U,
 	AT_DEVICE = 1U
+};
+
+enum {
+	DEVICE_IDLE = 0U,
+	DEVICE_ALARMING  = 1U,
+	DEVICE_LOST
 };
 
 typedef union _AT_Request_Pack_t{
@@ -106,11 +113,12 @@ typedef uint16_t addr_t;
 typedef struct {
 	addr_t address;
 	uint8_t type;
+	uint8_t state;
 } AT_Device_Handle_t;
 
 typedef struct {
 	AT_Device_Handle_t Device[20];
-	uint8_t Size;
+	uint8_t size;
 } AT_Device_Table_t;
 
 typedef struct _AT_Request_Set_t {

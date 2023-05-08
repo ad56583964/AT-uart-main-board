@@ -15,4 +15,7 @@ void reg_process();
 void device_show_test();
 void oledshow();
 
+void close_alarm();
+void open_alarm();
+
 #endif /* MAIN_APP_MAIN_APP_H_ */

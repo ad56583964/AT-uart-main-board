@@ -46,7 +46,8 @@ typedef enum _AT_Request_Type_t{
 	IR_DEVICE,
 	MAIN_ACK,
 	EDGE_ACK,
-	EDGE_ALARM
+	EDGE_ALARM,
+	BEAT
 }AT_Request_Type_t;
 
 typedef enum _EDGE_Type_t{

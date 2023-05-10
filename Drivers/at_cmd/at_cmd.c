@@ -50,7 +50,8 @@ AT_Status_t AT_request (AT_Request_Set_t* pack,AT_Receive_Read_t* get_pack){
 	AT_request_pack.data[1] = pack->data&0xff;
 
 	char _state = -1;
-	while(_state != osOK){
+	char failed_count = 0;
+	while(_state != osOK && failed_count < 5){
 		clear_semaphore();
 		start_receive();
 		AT_Send((uint8_t*)&AT_request_pack, 15);
@@ -58,11 +59,14 @@ AT_Status_t AT_request (AT_Request_Set_t* pack,AT_Receive_Read_t* get_pack){
 		_is_send_ok();
 		start_receive();
 		_state = wait_receive(200);
+		failed_count ++;
+	}
+	if(failed_count >= 5){
+		return AT_ERROR;
 	}
 	AT_receive_read_pack(get_pack);
 	return AT_OK;
 }
-
 AT_Status_t _check_header_tail(AT_Receive_Read_t* pack){
 	if(pack->header != 0xF1DD || pack->tail != 0x0A0D){
 		return AT_ERROR;

@@ -22,7 +22,7 @@ AT_Status_t _is_send_ok(){
 	int result = 0;
 	result = strncmp(rxbuf,"OK\r\n",4);
 	if(result == 0){
-		LOG("sendSucess\n");
+//		LOG("sendSucess\n");
 	}
 	else{
 		LOG("sendFailed\n");
@@ -67,7 +67,9 @@ AT_Status_t AT_request (AT_Request_Set_t* pack,AT_Receive_Read_t* get_pack){
 		start_receive();
 		_state = wait_receive(200);
 		failed_count ++;
+
 	}
+	LOG("failed_count:%d\n",failed_count);
 	if(failed_count >= 5){
 		return AT_ERROR;
 	}
@@ -178,6 +180,20 @@ int AT_Device_insert(uint16_t addr,uint8_t type){
 	AT_device_table.Device[Size - 1].state = DEVICE_IDLE;
 	AT_device_table.size = Size;
 	return ADD_SUCCESS;
+}
+
+int delete_device(AT_Device_Table_t* device_table, uint8_t index) {
+    if (device_table == NULL || index >= device_table->size) {
+        return AT_ERROR;
+    }
+
+    for (uint8_t i = index; i < device_table->size - 1; i++) {
+        memcpy(&device_table->Device[i], &device_table->Device[i + 1], sizeof(AT_Device_Handle_t));
+    }
+
+    device_table->size--;
+
+    return AT_OK;
 }
 
 int init_device_table(){

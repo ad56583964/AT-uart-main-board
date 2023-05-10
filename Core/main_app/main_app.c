@@ -53,13 +53,16 @@ void set_Alarm(const uint16_t addr){
 	open_alarm();
 }
 
+#define WAIT_TICK 500
+uint8_t alarm_remain_tick = 0;
+int roll_device_count = 0;
 void polling_process(){
 	start_receive();
 
 	uint32_t tick_cur = osKernelGetTickCount();
 
-	int _pollstate = wait_receive(1000);
-	LOG("PollOnce\n");
+	int _pollstate = wait_receive(WAIT_TICK);
+//	LOG("PollOnce\n");
 	if(_pollstate == 0){
 		LOG("GetPack\n");
 		AT_receive_read_pack(&received_pack);
@@ -73,28 +76,48 @@ void polling_process(){
 			AT_request_send_pack(&request_pack);
 			LOG("SetAlarm");
 			set_Alarm(received_pack.source_addr);
+			alarm_remain_tick = 5;
+		}
+		else if(alarm_remain_tick > 0){
+			alarm_remain_tick--;
 		}
 	}
+	else if(alarm_remain_tick > 0){
+		alarm_remain_tick--;
+	}
 	uint32_t tick_now = osKernelGetTickCount();
-	uint32_t tick_delta = 1000 - (tick_now - tick_cur);
+	uint32_t tick_delta = WAIT_TICK - (tick_now - tick_cur);
 
-	if(tick_delta>0 && tick_delta <= 1000){
+	if(tick_delta>0 && tick_delta <= WAIT_TICK){
 		osDelay(tick_delta);
 	}
 
-	request_pack.addr = AT_device_table.Device[0].address;
-	request_pack.type = BEAT;
-	request_pack.data = 0U;
-	uint8_t result = AT_request(&request_pack,&received_pack);
-	if(result != AT_ERROR){
-		if(received_pack.type == EDGE_ACK){
-			LOG("EDGE:%d_ok",request_pack.addr);
+	LOG("alarm_remain_tick:%d\n",alarm_remain_tick);
+	// BEAT EDGE
+	if(alarm_remain_tick == 0){
+		if(AT_device_table.size != 0){
+
+				request_pack.addr = AT_device_table.Device[roll_device_count].address;
+				request_pack.type = BEAT;
+				request_pack.data = 0U;
+				uint8_t result = AT_request(&request_pack,&received_pack);
+				if(result != AT_ERROR && received_pack.type == EDGE_ACK && (request_pack.addr == received_pack.source_addr)){
+						LOG("EDGE:%d_ok\n",request_pack.addr);
+				}
+				else{
+					AT_device_table.Device[roll_device_count].beat_lost++;
+					if(AT_device_table.Device[roll_device_count].beat_lost > 5){
+						delete_device(&AT_device_table,roll_device_count);
+						LOG("Delete\n");
+					}
+				}
+				roll_device_count++;
+				if(roll_device_count >= AT_device_table.size){
+					roll_device_count = 0;
+				}
+				LOG("roll_device_count:%d",roll_device_count);
 		}
 	}
-	else{
-
-	}
-
 
 }
 

@@ -114,6 +114,7 @@ typedef struct {
 	addr_t address;
 	uint8_t type;
 	uint8_t state;
+	uint8_t beat_lost;
 } AT_Device_Handle_t;
 
 typedef struct {
@@ -154,6 +155,8 @@ AT_Status_t AT_receive_read_pack (AT_Receive_Read_t* pack);
 
 AT_Status_t AT_process_reg_device(AT_Request_Set_t* request_pack,
 									AT_Receive_Read_t* received_pack);
+
+int delete_device(AT_Device_Table_t* device_table, uint8_t index);
 
 typedef enum{
 	UNKNOWN,

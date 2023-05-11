@@ -104,7 +104,7 @@ void polling_process(){
 				if(result != AT_ERROR && received_pack.type == EDGE_ACK && (request_pack.addr == received_pack.source_addr)){
 						LOG("EDGE:%d_ok\n",request_pack.addr);
 						//clear beat_lost
-						AT_device_table.Device[roll_device_count].beat_lost = 0
+						AT_device_table.Device[roll_device_count].beat_lost = 0;
 				}
 				else{
 					AT_device_table.Device[roll_device_count].beat_lost++;

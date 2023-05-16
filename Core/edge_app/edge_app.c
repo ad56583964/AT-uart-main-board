@@ -42,6 +42,10 @@ void edge_process_reg(){
 	LOG("Requested\n");
 }
 
+
+#define WAIT_TICK 200
+uint8_t alarm_remain_tick = 0;
+int roll_device_count = 0;
 void edge_main_loop(){
 	for(;;){
 		clear_semaphore();
@@ -66,7 +70,7 @@ void edge_main_loop(){
 				}
 			}
 		}
-		osDelay(150);
+		uint32_t tick_cur = osKernelGetTickCount();
 		uint8_t result = wait_receive(100);
 		if(result == osOK){
 			AT_receive_read_pack(&get_pack);
@@ -77,6 +81,12 @@ void edge_main_loop(){
 				pack.type = EDGE_ACK;
 				AT_request_send_pack(&pack);
 			}
+		}
+
+		uint32_t tick_now = osKernelGetTickCount();
+		uint32_t tick_delta = WAIT_TICK - (tick_now - tick_cur);
+		if(tick_delta>0 && tick_delta <= WAIT_TICK){
+			osDelay(tick_delta);
 		}
 	}
 }
